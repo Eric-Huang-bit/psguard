@@ -1,0 +1,20 @@
+{
+  "name": "psguard",
+  "version": "0.1.0",
+  "description": "Check, rewrite, and run coding-agent shell commands on Windows PowerShell. 在 Windows 上检查、改写并执行编码 agent 的命令。",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "bin": {
+    "psguard": "./cli/main.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test tests/corpus/schema.test.ts tests/corpus/behavior.test.ts tests/support.test.ts tests/run.test.ts tests/oneshot.test.ts tests/hook.test.ts tests/safety.test.ts tests/coverage.test.ts tests/edges.test.ts tests/mcp.test.ts",
+    "psguard": "node cli/main.ts"
+  }
+}

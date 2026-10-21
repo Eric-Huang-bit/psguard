@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": "node hooks/rewrite-command.ts --host cursor",
+        "matcher": "Shell"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "node hooks/rewrite-command.ts --host cursor"
+      }
+    ]
+  }
+}

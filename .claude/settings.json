@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "PowerShell|Shell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/rewrite-command.ts --host claude"
+          }
+        ]
+      }
+    ]
+  }
+}

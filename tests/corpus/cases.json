@@ -1,0 +1,397 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "ps51-get-location",
+      "shell": "powershell-5.1",
+      "command": "Get-Location",
+      "action": "allow",
+      "tag": "safe-contrast",
+      "summary": "A native PowerShell command is allowed on Windows PowerShell 5.1.",
+      "detail": "对照。Get-Location 在 5.1 上就是合法命令，检查器应放行。",
+      "execute": false,
+      "source": {
+        "name": "Cursor forum: agent shell never executes",
+        "url": "https://forum.cursor.com/t/agent-shell-commands-never-execute-on-windows-11-no-exit-status/166112"
+      }
+    },
+    {
+      "id": "ps51-select-first",
+      "shell": "powershell-5.1",
+      "command": "Get-Content app.log | Select-Object -First 50",
+      "action": "allow",
+      "tag": "safe-contrast",
+      "summary": "Select-Object -First is the PowerShell form and is allowed.",
+      "detail": "对照。这是 head 的 PowerShell 写法，不应再建议改写。",
+      "execute": false,
+      "source": {
+        "name": "博客园：DeepSeek Harness 安装踩坑",
+        "url": "https://www.cnblogs.com/foxcharon/p/22467976"
+      }
+    },
+    {
+      "id": "ps7-andand-npm",
+      "shell": "powershell-7",
+      "command": "npm install && npm run dev",
+      "action": "allow",
+      "tag": "chain-operator",
+      "summary": "&& is legal on PowerShell 7 and is allowed.",
+      "detail": "对照。管道链运算符从 PowerShell 7.0 开始合法。同一命令在 5.1 上才是 advise。",
+      "execute": false,
+      "source": {
+        "name": "vscode#250176",
+        "url": "https://github.com/microsoft/vscode/issues/250176"
+      }
+    },
+    {
+      "id": "gitbash-ls",
+      "shell": "git-bash",
+      "command": "ls -la",
+      "action": "allow",
+      "tag": "safe-contrast",
+      "summary": "ls -la is allowed when the real shell is Git Bash.",
+      "detail": "对照。同一条命令在 PowerShell 5.1 上是 advise。判断取决于实际 shell，不取决于命令看起来像谁。",
+      "execute": false,
+      "source": {
+        "name": "lean-ctx#156",
+        "url": "https://github.com/yvgude/lean-ctx/issues/156"
+      }
+    },
+    {
+      "id": "cmd-dir",
+      "shell": "cmd",
+      "command": "dir",
+      "action": "allow",
+      "tag": "safe-contrast",
+      "summary": "dir is allowed when the real shell is cmd.exe.",
+      "detail": "对照。cmd 的内建命令应放行。",
+      "execute": false,
+      "source": {
+        "name": "codex#9581",
+        "url": "https://github.com/openai/codex/issues/9581"
+      }
+    },
+    {
+      "id": "ps51-remove-item",
+      "shell": "powershell-5.1",
+      "command": "Remove-Item -LiteralPath 'D:\\example\\project\\cache' -Recurse -Force",
+      "action": "allow",
+      "tag": "safe-contrast",
+      "summary": "A well-formed Remove-Item is allowed. This checker does not block ordinary deletes.",
+      "detail": "对照。正常的 PowerShell 删除不在拒绝类里。拒绝类只覆盖 cmd 嵌套引号把 rmdir 或 rd 打到盘符根的写法。",
+      "execute": false,
+      "source": {
+        "name": "Cursor forum: quoted rmdir wiped a drive",
+        "url": "https://forum.cursor.com/t/cursor-agent-auto-ran-a-command-that-wiped-an-entire-drive-windows-powershell/175121"
+      }
+    },
+    {
+      "id": "ps51-echo-rmdir-repro",
+      "shell": "powershell-5.1",
+      "command": "cmd /c \"echo rmdir /s /q \\\"D:\\example\\project\\cache\\\"\"",
+      "action": "allow",
+      "tag": "safe-contrast",
+      "summary": "echo in front of rmdir is the public safe repro and must not be rejected.",
+      "detail": "对照。公开讨论用 echo 代替 rmdir 来观察引号如何被拆开。命令实际执行的是 echo，拒绝规则不能只因文中出现 rmdir 就拦截。",
+      "execute": false,
+      "source": {
+        "name": "Cursor forum: quoted rmdir wiped a drive",
+        "url": "https://forum.cursor.com/t/cursor-agent-auto-ran-a-command-that-wiped-an-entire-drive-windows-powershell/175121"
+      }
+    },
+    {
+      "id": "ps51-andand-cd-npm",
+      "shell": "powershell-5.1",
+      "command": "cd server && npm install",
+      "action": "advise",
+      "tag": "chain-operator",
+      "summary": "&& is a parse error on Windows PowerShell 5.1.",
+      "detail": "建议改成「前一条成功才跑后一条」，例如 cd server; if ($LASTEXITCODE -eq 0) { npm install }。不要改成总会执行的分号。",
+      "execute": false,
+      "source": {
+        "name": "cline#346",
+        "url": "https://github.com/cline/cline/issues/346"
+      }
+    },
+    {
+      "id": "ps51-andand-npm-dev",
+      "shell": "powershell-5.1",
+      "command": "npm install && npm run dev",
+      "action": "advise",
+      "tag": "chain-operator",
+      "summary": "&& between two npm commands fails on PowerShell 5.1.",
+      "detail": "建议保持失败即停。5.1 没有 &&。PowerShell 7 上的同形命令见 ps7-andand-npm，那条是 allow。",
+      "execute": false,
+      "source": {
+        "name": "vscode#250176",
+        "url": "https://github.com/microsoft/vscode/issues/250176"
+      }
+    },
+    {
+      "id": "ps51-andand-cd-claude",
+      "shell": "powershell-5.1",
+      "command": "cd \"C:\\example\\repo\" && claude",
+      "action": "advise",
+      "tag": "chain-operator",
+      "summary": "A launcher that joins cd and claude with && fails on PowerShell 5.1.",
+      "detail": "路径已改成示例目录。建议拆开，并只在 cd 成功后启动 claude。",
+      "execute": false,
+      "source": {
+        "name": "Auto-Claude#612",
+        "url": "https://github.com/AndyMik90/Auto-Claude/issues/612"
+      }
+    },
+    {
+      "id": "ps51-andand-mkdir",
+      "shell": "powershell-5.1",
+      "command": "cd example && mkdir -p backend/app",
+      "action": "advise",
+      "tag": "chain-operator",
+      "summary": "&& and mkdir -p are both outside PowerShell 5.1.",
+      "detail": "建议同时换掉 && 和 mkdir -p。目录创建用 New-Item -ItemType Directory -Force。",
+      "execute": false,
+      "source": {
+        "name": "Cursor forum: && is not a valid statement separator",
+        "url": "https://forum.cursor.com/t/the-token-is-not-a-valid-statement-delimiter-in-this-release/101142"
+      }
+    },
+    {
+      "id": "ps51-oror",
+      "shell": "powershell-5.1",
+      "command": "npm test || echo failed",
+      "action": "advise",
+      "tag": "chain-operator",
+      "summary": "|| is a parse error on Windows PowerShell 5.1.",
+      "detail": "建议改成按退出码分支，例如 npm test; if ($LASTEXITCODE -ne 0) { echo failed }。",
+      "execute": false,
+      "source": {
+        "name": "ruflo#1616",
+        "url": "https://github.com/ruvnet/ruflo/issues/1616"
+      }
+    },
+    {
+      "id": "ps51-head",
+      "shell": "powershell-5.1",
+      "command": "pnpm run typecheck 2>&1 | head -50",
+      "action": "advise",
+      "tag": "unix-tool",
+      "summary": "head is not a PowerShell command.",
+      "detail": "建议把结尾换成 Select-Object -First 50。见已放行的 ps51-select-first。",
+      "execute": false,
+      "source": {
+        "name": "博客园：DeepSeek Harness 安装踩坑",
+        "url": "https://www.cnblogs.com/foxcharon/p/22467976"
+      }
+    },
+    {
+      "id": "ps51-tail",
+      "shell": "powershell-5.1",
+      "command": "tail -20 .\\app.log",
+      "action": "advise",
+      "tag": "unix-tool",
+      "summary": "tail is not a PowerShell command.",
+      "detail": "建议改成 Get-Content .\\app.log -Tail 20。",
+      "execute": false,
+      "source": {
+        "name": "windows-claude-code-doctor",
+        "url": "https://github.com/IliaMalkin/windows-claude-code-doctor"
+      }
+    },
+    {
+      "id": "ps51-grep",
+      "shell": "powershell-5.1",
+      "command": "npm test 2>&1 | grep error",
+      "action": "advise",
+      "tag": "unix-tool",
+      "summary": "grep is not a PowerShell command.",
+      "detail": "建议改成 Select-String error。若机器上有 rg，也可以建议 rg，但不要假设 GNU grep 存在。",
+      "execute": false,
+      "source": {
+        "name": "windows-claude-code-doctor",
+        "url": "https://github.com/IliaMalkin/windows-claude-code-doctor"
+      }
+    },
+    {
+      "id": "ps51-sed",
+      "shell": "powershell-5.1",
+      "command": "sed -n \"1,20p\" README.md",
+      "action": "advise",
+      "tag": "unix-tool",
+      "summary": "sed is not a PowerShell command.",
+      "detail": "建议改成 Get-Content README.md -TotalCount 20。不要在第一版里翻译 sed 的一般替换语法。",
+      "execute": false,
+      "source": {
+        "name": "codex#13741",
+        "url": "https://github.com/openai/codex/issues/13741"
+      }
+    },
+    {
+      "id": "ps51-awk",
+      "shell": "powershell-5.1",
+      "command": "awk \"NR<=20\" README.md",
+      "action": "advise",
+      "tag": "unix-tool",
+      "summary": "awk is not a PowerShell command.",
+      "detail": "建议改成按行读取的 PowerShell 写法。第一版不翻译任意 awk 程序，给不出等价命令时就说明不支持。",
+      "execute": false,
+      "source": {
+        "name": "windows-claude-code-doctor",
+        "url": "https://github.com/IliaMalkin/windows-claude-code-doctor"
+      }
+    },
+    {
+      "id": "ps51-find-name",
+      "shell": "powershell-5.1",
+      "command": "find . -name \"*.ts\"",
+      "action": "advise",
+      "tag": "unix-tool",
+      "summary": "GNU find flags are not Windows find.exe.",
+      "detail": "Windows 的 find.exe 会按内容搜索，-name 不是它的参数。建议改成 Get-ChildItem -Recurse -Filter *.ts。",
+      "execute": false,
+      "source": {
+        "name": "codex#13741",
+        "url": "https://github.com/openai/codex/issues/13741"
+      }
+    },
+    {
+      "id": "ps51-ls-la",
+      "shell": "powershell-5.1",
+      "command": "ls -la",
+      "action": "advise",
+      "tag": "alias-clash",
+      "summary": "ls is a PowerShell alias, but -la is not a PowerShell parameter.",
+      "detail": "ls 在 5.1 里是 Get-ChildItem 的别名，-la 会变成无法绑定的参数。建议改成 Get-ChildItem。不建议拦截单独的 ls。",
+      "execute": false,
+      "source": {
+        "name": "Cursor forum: PowerShell support",
+        "url": "https://forum.cursor.com/t/powershell-support-in-cursor/150009"
+      }
+    },
+    {
+      "id": "ps51-curl-fssl",
+      "shell": "powershell-5.1",
+      "command": "curl -fsSL https://example.com/install.ps1",
+      "action": "advise",
+      "tag": "alias-clash",
+      "summary": "curl -fsSL hits the Invoke-WebRequest alias on Windows PowerShell 5.1.",
+      "detail": "5.1 的 curl 是 Invoke-WebRequest，-fsSL 会被当成参数名。建议改成 curl.exe，或改用 Invoke-WebRequest 的原参数。",
+      "execute": false,
+      "source": {
+        "name": "Cursor forum: PowerShell support",
+        "url": "https://forum.cursor.com/t/powershell-support-in-cursor/150009"
+      }
+    },
+    {
+      "id": "ps51-export",
+      "shell": "powershell-5.1",
+      "command": "export NODE_ENV=production",
+      "action": "advise",
+      "tag": "env-syntax",
+      "summary": "export is bash syntax.",
+      "detail": "建议改成 $env:NODE_ENV = 'production'。",
+      "execute": false,
+      "source": {
+        "name": "windows-claude-code-doctor",
+        "url": "https://github.com/IliaMalkin/windows-claude-code-doctor"
+      }
+    },
+    {
+      "id": "ps51-env-var",
+      "shell": "powershell-5.1",
+      "command": "cd $USERPROFILE",
+      "action": "advise",
+      "tag": "env-syntax",
+      "summary": "$USERPROFILE does not read the environment variable on PowerShell.",
+      "detail": "建议改成 cd $env:USERPROFILE。PowerShell 里 $HOME 是自动变量，不要把本条推广成「所有 $ 变量都错」。",
+      "execute": false,
+      "source": {
+        "name": "掘金：AI Agent 在 Windows 执行命令不熟练",
+        "url": "https://juejin.cn/post/7670925735855145000"
+      }
+    },
+    {
+      "id": "ps51-heredoc",
+      "shell": "powershell-5.1",
+      "command": "python - <<'PY'",
+      "action": "advise",
+      "tag": "unix-tool",
+      "summary": "Bash here-documents are not PowerShell syntax.",
+      "detail": "建议改成把脚本写到临时文件再调用，或使用 python -c。第一版只指出 heredoc，不自动拼多行脚本。",
+      "execute": false,
+      "source": {
+        "name": "windows-claude-code-doctor",
+        "url": "https://github.com/IliaMalkin/windows-claude-code-doctor"
+      }
+    },
+    {
+      "id": "gitbash-get-content",
+      "shell": "git-bash",
+      "command": "Get-Content package.json | Select-Object -First 200",
+      "action": "advise",
+      "tag": "dialect-mismatch",
+      "summary": "PowerShell cmdlets fail when the real shell is Git Bash.",
+      "detail": "建议改成 sed -n '1,200p' package.json 或 head -n 200 package.json。实际 shell 是 Git Bash 时不要回写 PowerShell。",
+      "execute": false,
+      "source": {
+        "name": "lean-ctx#156",
+        "url": "https://github.com/yvgude/lean-ctx/issues/156"
+      }
+    },
+    {
+      "id": "cmd-get-childitem",
+      "shell": "cmd",
+      "command": "Get-ChildItem -Name",
+      "action": "advise",
+      "tag": "dialect-mismatch",
+      "summary": "A PowerShell cmdlet fails when the runner is cmd.exe.",
+      "detail": "建议改成 dir /b。Codex 曾把执行器包成 cmd.exe /c，模型却发出 cmdlet。",
+      "execute": false,
+      "source": {
+        "name": "codex#9581",
+        "url": "https://github.com/openai/codex/issues/9581"
+      }
+    },
+    {
+      "id": "ps51-rmdir-quote",
+      "shell": "powershell-5.1",
+      "command": "cmd /c \"rmdir /s /q \\\"D:\\example\\project\\cache\\\"\"",
+      "action": "reject",
+      "tag": "destructive-quoting",
+      "summary": "Reject rmdir wrapped in cmd /c with backslash-escaped quotes.",
+      "detail": "PowerShell 的转义符是反引号，\\\" 不会保住内层引号，rmdir /s /q 可能落到当前盘根。拒绝，不改写，不执行。路径已换成示例目录。",
+      "execute": false,
+      "source": {
+        "name": "Cursor forum: quoted rmdir wiped a drive",
+        "url": "https://forum.cursor.com/t/cursor-agent-auto-ran-a-command-that-wiped-an-entire-drive-windows-powershell/175121"
+      }
+    },
+    {
+      "id": "ps51-rd-quote",
+      "shell": "powershell-5.1",
+      "command": "cmd /c \"rd /s /q \\\"C:\\example\\empty-dir\\\"\"",
+      "action": "reject",
+      "tag": "destructive-quoting",
+      "summary": "Reject rd /s /q with the same broken quoting.",
+      "detail": "rd 是 rmdir 的同义命令，同一类引号错误同样拒绝。",
+      "execute": false,
+      "source": {
+        "name": "Cursor forum: rd /s /q wiped a drive",
+        "url": "https://forum.cursor.com/t/agent-autonomous-rd-s-q-wiped-the-entire-d-drive-windows/174156"
+      }
+    },
+    {
+      "id": "ps7-rmdir-quote",
+      "shell": "powershell-7",
+      "command": "cmd /c \"rmdir /s /q \\\"D:\\example\\project\\cache\\\"\"",
+      "action": "reject",
+      "tag": "destructive-quoting",
+      "summary": "Reject the same rmdir quoting on PowerShell 7.",
+      "detail": "公开事故发生在 5.1。PowerShell 7 的转义符仍是反引号，\\\" 同样不是转义，所以这一类在 7 上也不改写、不执行。",
+      "execute": false,
+      "source": {
+        "name": "Cursor forum: quoted rmdir wiped a drive",
+        "url": "https://forum.cursor.com/t/cursor-agent-auto-ran-a-command-that-wiped-an-entire-drive-windows-powershell/175121"
+      }
+    }
+  ]
+}

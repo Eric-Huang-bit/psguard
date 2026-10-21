@@ -1,0 +1,19 @@
+{
+  "description": "Rewrite Windows shell commands with psguard before Codex runs them.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/rewrite-command.ts --host codex",
+            "commandWindows": "node hooks/rewrite-command.ts --host codex",
+            "timeout": 30,
+            "statusMessage": "psguard"
+          }
+        ]
+      }
+    ]
+  }
+}
